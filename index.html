@@ -25,8 +25,7 @@
     }
     .screen {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       max-width: 500px;
@@ -35,10 +34,8 @@
       pointer-events: none;
       transition: opacity 0.8s ease;
     }
-    .screen.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .screen.show { opacity: 1; pointer-events: auto; }
+
     .intro-screen h1 { font-size: 2.2rem; color: #fff; margin-bottom: 1rem; }
     .intro-screen p { font-size: 1.1rem; color: #fff; margin-bottom: 2rem; }
     .start-btn {
@@ -46,9 +43,10 @@
       font-size: 1.1rem; font-weight: 600; color: #fff;
       background: linear-gradient(90deg,#ff6b81,#ff9a9e);
       cursor: pointer; box-shadow: 0 4px 20px rgba(255,107,129,0.5);
-      transition: all 0.3s ease;
+      transition: 0.3s;
     }
     .start-btn:hover { transform: scale(1.08); }
+
     .question { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; }
     .romantic-text { font-size: 1.1rem; margin-bottom: 1.5rem; color: #fff; min-height: 1.5em; }
     .button-container { display: flex; justify-content: center; gap: 1.5rem; }
@@ -60,6 +58,33 @@
     .btn:hover { transform: scale(1.08); }
     .yes-btn { background: #4cd964; }
     .no-btn { background: #ff6b81; }
+
+    /* Form */
+    .form-container {
+      background: rgba(255,255,255,0.9);
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .form-container h2 { margin-bottom: 15px; color: #ff6b81; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button.submit-btn {
+      background: #ff6b81; color: #fff; border: none;
+      padding: 12px 20px; font-size: 1rem; border-radius: 8px;
+      cursor: pointer; transition: 0.3s; width: 100%;
+    }
+    button.submit-btn:hover { background: #ff8fa3; }
+    #status { margin-top: 10px; font-size: 0.9rem; }
+
+    /* Result */
     .gif-result {
       width: 100%; max-width: 320px; border-radius: 16px; margin-bottom: 1rem;
       opacity: 0; transform: scale(0.8);
@@ -98,6 +123,20 @@
     </div>
   </div>
 
+  <!-- Form Screen -->
+  <div class="screen" id="form-screen">
+    <div class="form-container">
+      <h2>Tulis Namamu ❤️</h2>
+      <form id="contact-form" action="https://formspree.io/f/xwprvwjg" method="POST">
+        <input type="text" name="nama" placeholder="Nama kamu..." required>
+        <input type="text" name="nomor" placeholder="Nomor HP kamu..." required>
+<input type="text" name="pesan" placeholder="Pesan dari kamu..." required>
+        <button type="submit" class="submit-btn">Kirim</button>
+      </form>
+      <p id="status"></p>
+    </div>
+  </div>
+
   <!-- Result Screen -->
   <div class="screen result-container" id="result-screen">
     <video class="gif-result" src="cute love gif.mp4" autoplay loop muted></video>
@@ -115,6 +154,7 @@
   <script>
     const introScreen = document.getElementById("intro-screen");
     const questionScreen = document.getElementById("question-screen");
+    const formScreen = document.getElementById("form-screen");
     const resultScreen = document.getElementById("result-screen");
     const startBtn = document.getElementById("start-btn");
 
@@ -126,11 +166,11 @@
     const bgAudio2 = document.getElementById("bg-audio2");
 
     const romanticLines = [
-  "Yakin nggak suka aku? 🥺",
-  "Aku cuma pengen bikin kamu bahagia setiap hari ❤️",
-  "Kamu tau kan, hatiku cuma buat kamu seorang 💕",
-  "Udahlah... tekan Yes aja, jangan bikin aku nunggu lebih lama 😘"
-];
+      "Yakin nggak suka aku? 🥺",
+      "Aku cuma pengen bikin kamu bahagia setiap hari ❤️",
+      "Kamu tau kan, hatiku cuma buat kamu seorang 💕",
+      "Udahlah... tekan Yes aja, jangan bikin aku nunggu lebih lama 😘"
+    ];
     let noClickCount = 0;
 
     // Start
@@ -147,12 +187,45 @@
       noClickCount++;
     });
 
-    // Yes
+    // Yes → langsung stop intro + play perfect + form muncul
     yesBtn.addEventListener("click", () => {
       questionScreen.classList.remove("show");
-      resultScreen.classList.add("show");
+      formScreen.classList.add("show");
+
       bgAudio1.pause();
+      bgAudio2.currentTime = 0;
       bgAudio2.play().catch(()=>{});
+    });
+
+    // Form submit → setelah terkirim, tampil result
+    const form = document.getElementById("contact-form");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.textContent = "Mengirim... ⏳";
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          status.textContent = "Terima kasih, pesan sudah terkirim ✅";
+          form.reset();
+
+          setTimeout(() => {
+            formScreen.classList.remove("show");
+            resultScreen.classList.add("show");
+          }, 1000);
+        } else {
+          status.textContent = "Gagal mengirim ❌, coba lagi.";
+        }
+      } catch (err) {
+        status.textContent = "Terjadi error ❌: " + err.message;
+      }
     });
   </script>
 </body>
