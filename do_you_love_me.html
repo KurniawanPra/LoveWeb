@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamu Suka Aku?</title>
+  <!-- font -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg,#ffafbd,#ffc3a0,#a1c4fd,#c2e9fb);
+      background-size: 400% 400%;
+      animation: gradient 12s ease infinite;
+      font-family: "Nunito", sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+    @keyframes gradient {
+      0% { background-position:0% 50%; }
+      50% { background-position:100% 50%; }
+      100% { background-position:0% 50%; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    .question {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 3px solid #fff;
+      animation: typing 3s steps(30, end), blink 0.7s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .btn {
+      border: none;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: #666;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .btn:active {
+      transform: scale(0.92);
+    }
+
+    .yes-btn { background: #4cd964; }
+    .yes-btn:hover { background: #34c759; }
+    .no-btn { background: #ff6b81; }
+    .no-btn:hover { background: #ff3b5c; }
+
+    .result-container {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .gif-result {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .result-container h2 {
+      font-size: 2.5rem;
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+      background: linear-gradient(90deg,#ff6b81,#a18cd1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .emoji {
+      font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
+      -webkit-text-fill-color: initial;
+      background: none;
+      text-shadow: none;
+    }
+
+    /* confetti */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0.9;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media(max-width:480px){
+      .question { font-size:1.5rem; }
+      .btn { padding: 12px 24px; font-size:0.9rem; }
+      .result-container h2 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container question-container">
+    <h2 class="question">Apakah kamu suka aku?</h2>
+    <div class="button-container">
+      <button class="yes-btn btn js-yes-btn">Yes</button>
+      <button class="no-btn btn js-no-btn">No</button>
+    </div>
+  </div>
+
+  <div class="container result-container">
+    <video class="gif-result" src="cute love gif.mp4" autoplay loop muted></video>
+    <h2>Saya tau itu <span class="emoji">😍</span>!</h2>
+  </div>
+
+  <!-- audio 1: untuk halaman awal -->
+  <audio id="bg-audio1" autoplay loop muted>
+    <source src="intro.mp3" type="audio/mp3">
+  </audio>
+  <!-- audio 2: untuk hasil yes -->
+  <audio id="bg-audio2" loop>
+    <source src="perfect.mp3" type="audio/mp3">
+  </audio>
+
+  <script>
+    const questionContainer = document.querySelector(".question-container");
+    const resultContainer = document.querySelector(".result-container");
+    const gifResult = document.querySelector(".gif-result");
+    const yesBtn = document.querySelector(".js-yes-btn");
+    const noBtn = document.querySelector(".js-no-btn");
+
+    const bgAudio1 = document.getElementById("bg-audio1");
+    const bgAudio2 = document.getElementById("bg-audio2");
+
+    // aktifkan audio1 (unmute setelah interaksi pertama)
+    document.body.addEventListener("click", () => {
+      bgAudio1.muted = false;
+      bgAudio1.play().catch(()=>{});
+    }, { once: true });
+
+    // Tombol No usil
+    noBtn.addEventListener("mouseover", () => {
+      const newX = Math.random() * 200 - 100;
+      const newY = Math.random() * 200 - 100;
+      noBtn.style.transform = `translate(${newX}px, ${newY}px)`;
+    });
+    noBtn.addEventListener("click", () => {
+      noBtn.innerText = "😜";
+      setTimeout(()=> noBtn.innerText = "No",600);
+    });
+
+    // Tombol Yes
+    yesBtn.addEventListener("click", () => {
+      yesBtn.disabled = true;
+
+      // stop audio1, play audio2
+      bgAudio1.pause();
+      bgAudio1.currentTime = 0;
+      bgAudio2.play();
+
+      // tampilkan hasil
+      questionContainer.style.display = "none";
+      resultContainer.style.display = "flex";
+      gifResult.play();
+
+      // confetti
+      for (let i = 0; i < 80; i++) {
+        let confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.background = `hsl(${Math.random()*360},100%,70%)`;
+        confetti.style.animationDuration = Math.random() * 3 + 2 + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    });
+  </script>
+</body>
+</html>
