@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamu Suka Aku?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg,#ffafbd,#ffc3a0,#a1c4fd,#c2e9fb);
+      background-size: 400% 400%;
+      animation: gradient 12s ease infinite;
+      font-family: "Nunito", sans-serif;
+      overflow: hidden;
+    }
+    @keyframes gradient {
+      0% { background-position:0% 50%; }
+      50% { background-position:100% 50%; }
+      100% { background-position:0% 50%; }
+    }
+    .screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .screen.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .intro-screen h1 { font-size: 2.2rem; color: #fff; margin-bottom: 1rem; }
+    .intro-screen p { font-size: 1.1rem; color: #fff; margin-bottom: 2rem; }
+    .start-btn {
+      padding: 14px 36px; border: none; border-radius: 50px;
+      font-size: 1.1rem; font-weight: 600; color: #fff;
+      background: linear-gradient(90deg,#ff6b81,#ff9a9e);
+      cursor: pointer; box-shadow: 0 4px 20px rgba(255,107,129,0.5);
+      transition: all 0.3s ease;
+    }
+    .start-btn:hover { transform: scale(1.08); }
+    .question { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; }
+    .romantic-text { font-size: 1.1rem; margin-bottom: 1.5rem; color: #fff; min-height: 1.5em; }
+    .button-container { display: flex; justify-content: center; gap: 1.5rem; }
+    .btn {
+      border: none; padding: 14px 36px; border-radius: 50px;
+      font-size: 1rem; font-weight: 600; color: #fff;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .btn:hover { transform: scale(1.08); }
+    .yes-btn { background: #4cd964; }
+    .no-btn { background: #ff6b81; }
+    .gif-result {
+      width: 100%; max-width: 320px; border-radius: 16px; margin-bottom: 1rem;
+      opacity: 0; transform: scale(0.8);
+      animation: zoomIn 1s ease forwards 0.3s;
+    }
+    .result-container h2 {
+      font-size: 2.5rem;
+      font-family: "Great Vibes", cursive;
+      background: linear-gradient(90deg,#ff6b81,#a18cd1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .emoji {
+      font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
+      -webkit-text-fill-color: initial;
+      background: none;
+    }
+    @keyframes zoomIn { from{opacity:0; transform:scale(0.8)} to{opacity:1; transform:scale(1)} }
+  </style>
+</head>
+<body>
+  <!-- Intro Screen -->
+  <div class="screen intro-screen show" id="intro-screen">
+    <h1>Halo ❤️</h1>
+    <p>Aku mau tanya sesuatu...</p>
+    <button class="start-btn" id="start-btn">Mulai</button>
+  </div>
+
+  <!-- Question Screen -->
+  <div class="screen question-container" id="question-screen">
+    <h2 class="question">Apakah kamu suka aku?</h2>
+    <p class="romantic-text" id="romantic-text"></p>
+    <div class="button-container">
+      <button class="yes-btn btn js-yes-btn">Yes</button>
+      <button class="no-btn btn js-no-btn">No</button>
+    </div>
+  </div>
+
+  <!-- Result Screen -->
+  <div class="screen result-container" id="result-screen">
+    <video class="gif-result" src="cute love gif.mp4" autoplay loop muted></video>
+    <h2>Saya tau itu <span class="emoji">😍</span>!</h2>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bg-audio1" loop>
+    <source src="intro.mp3" type="audio/mp3">
+  </audio>
+  <audio id="bg-audio2" loop>
+    <source src="perfect.mp3" type="audio/mp3">
+  </audio>
+
+  <script>
+    const introScreen = document.getElementById("intro-screen");
+    const questionScreen = document.getElementById("question-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const startBtn = document.getElementById("start-btn");
+
+    const yesBtn = document.querySelector(".js-yes-btn");
+    const noBtn = document.querySelector(".js-no-btn");
+    const romanticText = document.getElementById("romantic-text");
+
+    const bgAudio1 = document.getElementById("bg-audio1");
+    const bgAudio2 = document.getElementById("bg-audio2");
+
+    const romanticLines = [
+  "Yakin nggak suka aku? 🥺",
+  "Aku cuma pengen bikin kamu bahagia setiap hari ❤️",
+  "Kamu tau kan, hatiku cuma buat kamu seorang 💕",
+  "Udahlah... tekan Yes aja, jangan bikin aku nunggu lebih lama 😘"
+];
+    let noClickCount = 0;
+
+    // Start
+    startBtn.addEventListener("click", () => {
+      introScreen.classList.remove("show");
+      questionScreen.classList.add("show");
+      bgAudio1.currentTime = 0;
+      bgAudio1.play().catch(()=>{});
+    });
+
+    // No
+    noBtn.addEventListener("click", () => {
+      romanticText.textContent = romanticLines[Math.min(noClickCount, romanticLines.length - 1)];
+      noClickCount++;
+    });
+
+    // Yes
+    yesBtn.addEventListener("click", () => {
+      questionScreen.classList.remove("show");
+      resultScreen.classList.add("show");
+      bgAudio1.pause();
+      bgAudio2.play().catch(()=>{});
+    });
+  </script>
+</body>
+</html>
